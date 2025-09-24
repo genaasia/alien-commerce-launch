@@ -126,7 +126,7 @@ interface WhereCondition {
 
 interface OrderByColumn {
   column: string;
-  direction: 'asc' | 'desc';
+  direction: 'ASC' | 'DESC';
 }
 
 interface ApiResponse {
@@ -175,7 +175,7 @@ class GenabaseClient {
         { column: 'is_published', op: 'eq' as const, value: true },
         { column: 'availability_status', op: 'eq' as const, value: 'IN_STOCK' }
       ],
-      order_by: [{ column: 'created_at', direction: 'desc' as const }],
+      order_by: [{ column: 'created_at', direction: 'DESC' as const }],
     });
 
     return response.returned_data || [];
@@ -191,7 +191,7 @@ class GenabaseClient {
       table: 'product_variants',
       data: [],
       where_conditions: whereConditions,
-      order_by: [{ column: 'price', direction: 'asc' as const }],
+      order_by: [{ column: 'price', direction: 'ASC' as const }],
     });
 
     return response.returned_data || [];
