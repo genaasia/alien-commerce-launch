@@ -10,12 +10,6 @@ import { api, Product, ProductVariant, CartItem } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Zap, ShoppingBag } from 'lucide-react';
 
-// Sample data for demo (replace with API calls when ready)
-import product1Image from '@/assets/product-1.jpg';
-import product2Image from '@/assets/product-2.jpg';
-import product3Image from '@/assets/product-3.jpg';
-import product4Image from '@/assets/product-4.jpg';
-
 interface CartItemWithDetails extends CartItem {
   variant?: ProductVariant;
   product?: Product;
@@ -32,90 +26,54 @@ const Index = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  // Sample data for demo
-  const sampleProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Quantum Fusion Jacket',
-      description: 'A cutting-edge jacket with alien tech aesthetics, featuring neon cyan accents and holographic details.',
-      image_url: product1Image,
-      is_published: true,
-      availability_status: 'IN_STOCK',
-      tags: 'outerwear,premium,quantum',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Nexus Energy Hoodie',
-      description: 'Sleek hoodie with glowing energy lines and crystal-like elements for the ultimate sci-fi look.',
-      image_url: product2Image,
-      is_published: true,
-      availability_status: 'IN_STOCK',
-      tags: 'casual,energy,hoodie',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      name: 'Circuit Surge Pants',
-      description: 'Futuristic pants with neon circuit patterns and holographic side panels.',
-      image_url: product3Image,
-      is_published: true,
-      availability_status: 'IN_STOCK',
-      tags: 'bottoms,tech,circuits',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      name: 'Cosmic Shift Tee',
-      description: 'Iridescent t-shirt with color-shifting fabric and minimalist alien symbols.',
-      image_url: product4Image,
-      is_published: true,
-      availability_status: 'IN_STOCK',
-      tags: 'casual,basics,cosmic',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ];
-
-  const sampleVariants: ProductVariant[] = [
-    // Quantum Fusion Jacket variants
-    { id: '1-s', product_id: '1', title: 'Small', price: 299.99, sku: 'QFJ-S', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '1-m', product_id: '1', title: 'Medium', price: 299.99, sku: 'QFJ-M', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '1-l', product_id: '1', title: 'Large', price: 299.99, sku: 'QFJ-L', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '1-xl', product_id: '1', title: 'X-Large', price: 319.99, sku: 'QFJ-XL', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    
-    // Nexus Energy Hoodie variants
-    { id: '2-s', product_id: '2', title: 'Small', price: 189.99, sku: 'NEH-S', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '2-m', product_id: '2', title: 'Medium', price: 189.99, sku: 'NEH-M', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '2-l', product_id: '2', title: 'Large', price: 189.99, sku: 'NEH-L', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    
-    // Circuit Surge Pants variants
-    { id: '3-30', product_id: '3', title: '30"', price: 159.99, sku: 'CSP-30', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '3-32', product_id: '3', title: '32"', price: 159.99, sku: 'CSP-32', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '3-34', product_id: '3', title: '34"', price: 159.99, sku: 'CSP-34', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '3-36', product_id: '3', title: '36"', price: 159.99, sku: 'CSP-36', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    
-    // Cosmic Shift Tee variants
-    { id: '4-s', product_id: '4', title: 'Small', price: 79.99, sku: 'CST-S', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '4-m', product_id: '4', title: 'Medium', price: 79.99, sku: 'CST-M', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '4-l', product_id: '4', title: 'Large', price: 79.99, sku: 'CST-L', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: '4-xl', product_id: '4', title: 'X-Large', price: 84.99, sku: 'CST-XL', taxable: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  ];
-
+  // Load real products from your database
   useEffect(() => {
-    // Load sample data for demo
-    setProducts(sampleProducts);
-    setVariants(sampleVariants);
-    setIsLoading(false);
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        console.log('Loading products from Genabase API...');
+        
+        // Load products from your database
+        const productsData = await api.getProducts();
+        console.log('Loaded products:', productsData);
+        setProducts(productsData);
+        
+        // Load all variants
+        const variantsData = await api.getProductVariants();
+        console.log('Loaded variants:', variantsData);
+        setVariants(variantsData);
+        
+        // Get or create cart
+        let cart = await api.getCart(sessionId);
+        if (!cart) {
+          console.log('Creating new cart...');
+          cart = await api.createCart(sessionId);
+        }
+        console.log('Cart:', cart);
+        setCartId(cart.id);
+        
+        // Load existing cart items
+        if (cart) {
+          const items = await api.getCartItems(cart.id);
+          console.log('Loaded cart items:', items);
+          setCartItems(items);
+        }
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "Loading Error",
+          description: "Failed to load products from database. Please refresh the page.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // In a real app, you'd create/get cart here
-    // For demo, we'll simulate it
-    const demoCartId = 'demo-cart-' + sessionId;
-    setCartId(demoCartId);
-  }, [sessionId]);
+    loadData();
+  }, [sessionId, toast]);
 
   const getVariantsForProduct = (productId: string) => {
     return variants.filter(variant => variant.product_id === productId);
@@ -133,24 +91,24 @@ const Index = () => {
 
   const handleAddToCart = async (variantId: string, quantity: number) => {
     try {
-      // For demo, simulate adding to cart
-      const existingItemIndex = cartItems.findIndex(item => item.variant_id === variantId);
-      
-      if (existingItemIndex >= 0) {
-        const updatedItems = [...cartItems];
-        updatedItems[existingItemIndex].quantity += quantity;
-        setCartItems(updatedItems);
-      } else {
-        const newItem: CartItem = {
-          id: 'item-' + Math.random().toString(36).substr(2, 9),
-          cart_id: cartId!,
-          variant_id: variantId,
-          quantity,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setCartItems([...cartItems, newItem]);
+      if (!cartId) {
+        toast({
+          title: "Error",
+          description: "Cart not initialized. Please refresh the page.",
+          variant: "destructive",
+        });
+        return;
       }
+
+      console.log('Adding to cart:', { cartId, variantId, quantity });
+      
+      // Add to cart via API
+      const cartItem = await api.addToCart(cartId, variantId, quantity);
+      console.log('Added cart item:', cartItem);
+      
+      // Reload cart items
+      const updatedItems = await api.getCartItems(cartId);
+      setCartItems(updatedItems);
 
       const variant = variants.find(v => v.id === variantId);
       const product = products.find(p => p.id === variant?.product_id);
@@ -169,20 +127,32 @@ const Index = () => {
     }
   };
 
-  const handleUpdateCartQuantity = (variantId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      setCartItems(cartItems.filter(item => item.variant_id !== variantId));
-      toast({
-        title: "Item Removed",
-        description: "Item has been removed from your cart.",
-      });
-    } else {
-      const updatedItems = cartItems.map(item =>
-        item.variant_id === variantId
-          ? { ...item, quantity: newQuantity }
-          : item
-      );
+  const handleUpdateCartQuantity = async (variantId: string, newQuantity: number) => {
+    try {
+      if (!cartId) return;
+
+      console.log('Updating cart quantity:', { cartId, variantId, newQuantity });
+      
+      // Update via API
+      await api.updateCartItemQuantity(cartId, variantId, newQuantity);
+      
+      // Reload cart items
+      const updatedItems = await api.getCartItems(cartId);
       setCartItems(updatedItems);
+
+      if (newQuantity <= 0) {
+        toast({
+          title: "Item Removed",
+          description: "Item has been removed from your cart.",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update cart. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -190,8 +160,72 @@ const Index = () => {
     try {
       setIsLoading(true);
       
-      // For demo, simulate order processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!cartId || cartItems.length === 0) {
+        throw new Error('No items in cart');
+      }
+
+      console.log('Processing order:', orderData);
+      
+      // Create customer
+      const customer = await api.createCustomer(
+        orderData.customer.email,
+        orderData.customer.firstName,
+        orderData.customer.lastName,
+        orderData.customer.phone
+      );
+      console.log('Created customer:', customer);
+      
+      // Calculate totals
+      const subtotal = cartItemsWithDetails.reduce((sum, item) => {
+        return sum + (item.variant?.price || 0) * item.quantity;
+      }, 0);
+      const shippingCost = 15.00;
+      const tax = subtotal * 0.08;
+      const total = subtotal + shippingCost + tax;
+      
+      // Create order
+      const order = await api.createOrder(customer.id, cartId, {
+        subtotal_price: subtotal,
+        shipping_price: shippingCost,
+        total_tax: tax,
+        total_price: total,
+        notes: orderData.notes,
+      });
+      console.log('Created order:', order);
+      
+      // Create line items
+      const lineItemsData = cartItemsWithDetails.map(item => ({
+        order_id: order.id,
+        variant_id: item.variant_id,
+        product_id: item.variant?.product_id,
+        title: item.product?.name,
+        sku: item.variant?.sku,
+        quantity: item.quantity,
+        unit_price: item.variant?.price || 0,
+        unit_tax_amount: (item.variant?.price || 0) * 0.08,
+        total_discount: 0,
+        total_price: (item.variant?.price || 0) * item.quantity,
+      }));
+      
+      const lineItems = await api.createLineItems(lineItemsData);
+      console.log('Created line items:', lineItems);
+      
+      // Create addresses
+      const addresses = [
+        {
+          order_id: order.id,
+          type: 'SHIPPING' as const,
+          ...orderData.shipping,
+        },
+        {
+          order_id: order.id,
+          type: 'BILLING' as const,
+          ...(orderData.billing || orderData.shipping),
+        },
+      ];
+      
+      const orderAddresses = await api.createOrderAddresses(addresses);
+      console.log('Created addresses:', orderAddresses);
       
       // Clear cart after successful order
       setCartItems([]);
@@ -199,7 +233,7 @@ const Index = () => {
       
       toast({
         title: "Order Successful!",
-        description: "Your order has been placed and will be processed soon.",
+        description: `Order #${order.id.slice(0, 8)} has been placed and will be processed soon.`,
       });
     } catch (error) {
       console.error('Order error:', error);
