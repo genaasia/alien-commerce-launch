@@ -302,6 +302,8 @@ const Index = () => {
           onUpdateQuantity={handleUpdateCartQuantity}
           onCheckout={() => setIsCheckoutOpen(true)}
           isLoading={isLoading}
+          isOpen={isCartOpen}
+          onOpenChange={setIsCartOpen}
         />
       </div>
 

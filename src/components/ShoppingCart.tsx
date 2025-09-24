@@ -17,10 +17,15 @@ interface ShoppingCartProps {
   onUpdateQuantity: (variantId: string, quantity: number) => void;
   onCheckout: () => void;
   isLoading?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const ShoppingCart = ({ items, onUpdateQuantity, onCheckout, isLoading }: ShoppingCartProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const ShoppingCart = ({ items, onUpdateQuantity, onCheckout, isLoading, isOpen: externalIsOpen, onOpenChange }: ShoppingCartProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = onOpenChange || setInternalIsOpen;
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => {
