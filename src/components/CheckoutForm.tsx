@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap, CreditCard, MapPin, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@supabase/supabase-js';
 
 interface CartItemWithDetails {
   id: string;
@@ -124,9 +125,30 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
     }).format(price);
   };
 
-  const createStripePaymentLink = async () => {
-    // Use the pre-created Stripe Payment Link
-    return "https://buy.stripe.com/test_00wbJ3fED64I2zvctz5sA02";
+  const createStripePaymentSession = async () => {
+    try {
+      // Create Supabase client
+      const supabase = createClient(
+        import.meta.env.VITE_SUPABASE_URL || '',
+        import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+      );
+
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          amount: finalTotal,
+          currency: 'usd',
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data.url;
+    } catch (error) {
+      console.error('Error creating payment session:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,8 +184,8 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
         notes: notes || undefined,
       }));
 
-      // Create Stripe payment link and redirect
-      const paymentUrl = await createStripePaymentLink();
+      // Create Stripe payment session and redirect
+      const paymentUrl = await createStripePaymentSession();
       
       toast({
         title: "Redirecting to Payment",
