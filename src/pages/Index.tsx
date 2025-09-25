@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { StoreHeader } from '@/components/StoreHeader';
@@ -17,6 +18,8 @@ interface CartItemWithDetails extends CartItem {
 
 const Index = () => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [cartItems, setCartItems] = useState<CartItemWithDetails[]>([]);
@@ -25,6 +28,39 @@ const Index = () => {
   const [cartId, setCartId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  // Check for payment success on component mount
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      handlePaymentSuccess();
+      // Clean up URL
+      setSearchParams(new URLSearchParams());
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handlePaymentSuccess = async () => {
+    try {
+      const pendingOrderData = localStorage.getItem('pendingOrder');
+      if (pendingOrderData) {
+        const orderData = JSON.parse(pendingOrderData);
+        await handleCompleteOrder(orderData);
+        localStorage.removeItem('pendingOrder');
+        
+        toast({
+          title: "Payment Successful!",
+          description: "Your order has been created and will be shipped soon.",
+        });
+      }
+    } catch (error) {
+      console.error('Error completing order after payment:', error);
+      toast({
+        title: "Order Creation Failed",
+        description: "Payment was successful but order creation failed. Please contact support.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Load real products from your database
   useEffect(() => {
