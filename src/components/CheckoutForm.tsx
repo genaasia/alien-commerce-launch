@@ -8,8 +8,11 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Zap, CreditCard, MapPin, User, Mail, Phone } from 'lucide-react';
+import { Zap, CreditCard, MapPin, User, Mail, Phone, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Elements } from '@stripe/react-stripe-js';
+import stripePromise from '@/lib/stripe';
+import { PaymentForm } from './PaymentForm';
 
 interface CartItemWithDetails {
   id: string;
@@ -70,6 +73,8 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sameAsShipping, setSameAsShipping] = useState(true);
+  const [paymentStep, setPaymentStep] = useState<'info' | 'payment' | 'processing'>('info');
+  const [paymentIntentId, setPaymentIntentId] = useState<string>('');
 
   // Form state
   const [customerData, setCustomerData] = useState({
@@ -147,6 +152,13 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
       return;
     }
 
+    // Move to payment step
+    setPaymentStep('payment');
+  };
+
+  const handlePaymentSuccess = async (paymentId: string) => {
+    setPaymentIntentId(paymentId);
+    setPaymentStep('processing');
     setIsSubmitting(true);
 
     try {
@@ -159,15 +171,18 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
 
       toast({
         title: "Order Placed Successfully!",
-        description: "Your order has been processed and will be shipped soon.",
+        description: "Your payment has been processed and your order will be shipped soon.",
       });
 
       onClose();
+      // Reset form
+      setPaymentStep('info');
+      setPaymentIntentId('');
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error('Order creation error:', error);
       toast({
         title: "Order Failed",
-        description: "There was an error processing your order. Please try again.",
+        description: "Payment was processed but order creation failed. Please contact support.",
         variant: "destructive",
       });
     } finally {
@@ -182,13 +197,21 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Zap className="w-6 h-6 text-primary" />
             Quantum Checkout
+            {paymentStep === 'payment' && " - Payment"}
+            {paymentStep === 'processing' && " - Processing"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
-          {/* Order Form */}
-          <div className="space-y-6 overflow-y-auto pr-2 max-h-[70vh]">
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <Elements stripe={stripePromise} options={{
+          mode: 'payment',
+          amount: Math.round(finalTotal * 100),
+          currency: 'usd',
+        }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
+            {/* Order Form */}
+            <div className="space-y-6 overflow-y-auto pr-2 max-h-[70vh]">
+              {paymentStep === 'info' && (
+                <form onSubmit={handleSubmit} className="space-y-6">
               {/* Customer Information */}
               <Card className="bg-gradient-card border-border/50">
                 <CardHeader className="pb-3">
@@ -392,8 +415,38 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
                   />
                 </CardContent>
               </Card>
-            </form>
-          </div>
+                </form>
+              )}
+
+              {paymentStep === 'payment' && (
+                <div className="space-y-6">
+                  <Button
+                    onClick={() => setPaymentStep('info')}
+                    variant="outline"
+                    className="mb-4"
+                  >
+                    ← Back to Information
+                  </Button>
+                  <PaymentForm
+                    amount={finalTotal}
+                    onPaymentSuccess={handlePaymentSuccess}
+                    customerEmail={customerData.email}
+                  />
+                </div>
+              )}
+
+              {paymentStep === 'processing' && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center space-y-4">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                    <h3 className="text-lg font-semibold">Processing Your Order</h3>
+                    <p className="text-muted-foreground">
+                      Please wait while we finalize your order...
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
 
           {/* Order Summary */}
           <div className="space-y-6">
@@ -447,20 +500,22 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || items.length === 0}
-                  className="w-full bg-gradient-primary hover:bg-primary-glow border-0 shadow-glow"
-                  size="lg"
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  {isSubmitting ? 'Processing Order...' : `Complete Order • ${formatPrice(finalTotal)}`}
-                </Button>
+                {paymentStep === 'info' && (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting || items.length === 0}
+                    className="w-full bg-gradient-primary hover:bg-primary-glow border-0 shadow-glow"
+                    size="lg"
+                  >
+                    {isSubmitting ? 'Processing...' : 'Continue to Payment'}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
+      </Elements>
+    </DialogContent>
+  </Dialog>
+);
 };
