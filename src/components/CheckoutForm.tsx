@@ -125,32 +125,8 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
   };
 
   const createStripePaymentLink = async () => {
-    try {
-      // Create a payment link for the calculated total
-      const response = await fetch('https://api.stripe.com/v1/payment_links', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_STRIPE_SECRET_KEY || 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          'line_items[0][price]': 'price_1SB9INRsZFW8uA2S5YjiGttr',
-          'line_items[0][quantity]': '1',
-          'after_completion[type]': 'redirect',
-          'after_completion[redirect][url]': `${window.location.origin}/?payment=success`,
-        }).toString(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const paymentLink = await response.json();
-      return paymentLink.url;
-    } catch (error) {
-      console.error('Error creating payment link:', error);
-      throw error;
-    }
+    // Use the pre-created Stripe Payment Link
+    return "https://buy.stripe.com/test_00wbJ3fED64I2zvctz5sA02";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
