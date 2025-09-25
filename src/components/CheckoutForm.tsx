@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap, CreditCard, MapPin, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CartItemWithDetails {
   id: string;
@@ -127,12 +127,6 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
 
   const createStripePaymentSession = async () => {
     try {
-      // Create Supabase client
-      const supabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL || '',
-        import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-      );
-
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           amount: finalTotal,
