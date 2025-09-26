@@ -360,6 +360,13 @@ class GenabaseClient {
   async trackVisitor(path: string, userAgent?: string, referrer?: string): Promise<void> {
     const trackingUrl = `${API_BASE_URL}/tenants/${TENANT_ID}/databases/tracking/execute`;
     
+    // Generate or retrieve session ID from localStorage
+    let sessionId = localStorage.getItem('visitor-session-id');
+    if (!sessionId) {
+      sessionId = 'visitor-session-' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('visitor-session-id', sessionId);
+    }
+    
     try {
       const response = await fetch(trackingUrl, {
         method: 'POST',
@@ -373,7 +380,7 @@ class GenabaseClient {
             path,
             user_agent: userAgent || null,
             referrer: referrer || null,
-            ip_address: null // Cannot get IP from client-side
+            ip_address: sessionId // Using ip_address column for session ID
           }],
         }),
       });
