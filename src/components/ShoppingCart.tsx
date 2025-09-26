@@ -76,7 +76,7 @@ export const ShoppingCart = ({ items, onUpdateQuantity, onCheckout, isLoading, i
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-[calc(100vh-120px)]">
           {items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
               <div className="w-16 h-16 mb-4 rounded-full bg-muted/50 flex items-center justify-center">
@@ -89,8 +89,8 @@ export const ShoppingCart = ({ items, onUpdateQuantity, onCheckout, isLoading, i
             </div>
           ) : (
             <>
-              <ScrollArea className="flex-1 py-4">
-                <div className="space-y-4">
+              <ScrollArea className="flex-1 py-4 min-h-0">
+                <div className="space-y-4 pb-4">
                   {items.map((item) => (
                     <div key={item.id} className="group">
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-card border border-border/50 hover:border-primary/30 transition-colors">
@@ -174,7 +174,7 @@ export const ShoppingCart = ({ items, onUpdateQuantity, onCheckout, isLoading, i
                 </div>
               </ScrollArea>
 
-              <div className="border-t border-border pt-4 space-y-4">
+              <div className="flex-shrink-0 border-t border-border pt-4 pb-4 space-y-4 bg-card">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Subtotal</span>
