@@ -379,8 +379,8 @@ class GenabaseClient {
           data: [{
             path,
             user_agent: userAgent || null,
-            referrer: referrer || null,
-            ip_address: sessionId // Using ip_address column for session ID
+            referrer: referrer ? `${referrer} | session:${sessionId}` : `session:${sessionId}`, // Store session ID in referrer field
+            ip_address: null // Keep as null since it expects INET format
           }],
         }),
       });
