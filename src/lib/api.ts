@@ -1,7 +1,7 @@
 // Genabase API Client for Alien Clothing Store
 
-const API_BASE_URL = 'https://api.staging.genabase.com';
-const TENANT_ID = 'google-oauth2|110960506452287422576';
+const API_BASE_URL = 'https://api.genabase.com';
+const TENANT_ID = 'google-oauth2|113590440864166206329';
 const DB_NAME = 'default';
 
 export interface Product {
@@ -354,118 +354,6 @@ class GenabaseClient {
     });
 
     return response.returned_data || [];
-  }
-
-  // Event Tracking
-  async trackEvent(eventType: string, eventData?: any, path?: string): Promise<void> {
-    const trackingUrl = `${API_BASE_URL}/tenants/${TENANT_ID}/databases/tracking_v2/execute`;
-    
-    // Generate or retrieve session ID from localStorage
-    let sessionId = localStorage.getItem('visitor-session-id');
-    if (!sessionId) {
-      sessionId = 'visitor-session-' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('visitor-session-id', sessionId);
-    }
-
-    try {
-      // First, find or create visitor record
-      let visitorId = sessionStorage.getItem('visitor-id');
-      
-      if (!visitorId) {
-        // Create new visitor record
-        const visitorResponse = await fetch(trackingUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            operation: 'insert',
-            table: 'visitors',
-            data: [{
-              path: path || window.location.pathname,
-              user_agent: navigator.userAgent,
-              referrer: document.referrer || null,
-              session_id: sessionId
-            }],
-            return_columns: ['id']
-          }),
-        });
-
-        if (visitorResponse.ok) {
-          const visitorResult = await visitorResponse.json();
-          if (visitorResult.returned_data && visitorResult.returned_data[0]) {
-            visitorId = visitorResult.returned_data[0].id;
-            sessionStorage.setItem('visitor-id', visitorId);
-          }
-        }
-      }
-
-      // Now track the event
-      if (visitorId) {
-        await fetch(trackingUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            operation: 'insert',
-            table: 'events',
-            data: [{
-              visitor_id: visitorId,
-              event_type: eventType,
-              element: eventData?.tagName || null,
-              metadata: eventData ? JSON.stringify(eventData) : null
-            }],
-          }),
-        });
-      }
-    } catch (error) {
-      console.error('Event tracking error:', error);
-      // Don't throw error to avoid disrupting user experience
-    }
-  }
-
-  // Page Tracking (creates visitor record)
-  async trackVisitor(path: string, userAgent?: string, referrer?: string): Promise<void> {
-    const trackingUrl = `${API_BASE_URL}/tenants/${TENANT_ID}/databases/tracking_v2/execute`;
-    
-    // Generate or retrieve session ID from localStorage
-    let sessionId = localStorage.getItem('visitor-session-id');
-    if (!sessionId) {
-      sessionId = 'visitor-session-' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('visitor-session-id', sessionId);
-    }
-    
-    try {
-      const response = await fetch(trackingUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          operation: 'insert',
-          table: 'visitors',
-          data: [{
-            path,
-            user_agent: userAgent || navigator.userAgent,
-            referrer: referrer || document.referrer || null,
-            session_id: sessionId
-          }],
-          return_columns: ['id']
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.returned_data && result.returned_data[0]) {
-          // Store visitor ID for event tracking
-          sessionStorage.setItem('visitor-id', result.returned_data[0].id);
-        }
-      }
-    } catch (error) {
-      console.error('Visitor tracking error:', error);
-      throw error;
-    }
   }
 }
 
