@@ -125,25 +125,6 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
     }).format(price);
   };
 
-  const createStripePaymentSession = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          amount: finalTotal,
-          currency: 'usd',
-        },
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return data.url;
-    } catch (error) {
-      console.error('Error creating payment session:', error);
-      throw error;
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,30 +151,27 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
     setIsSubmitting(true);
 
     try {
-      // Store order data for completion after payment
-      localStorage.setItem('pendingOrder', JSON.stringify({
+      // Complete the order directly without payment processing
+      await onCompleteOrder({
         customer: customerData,
         shipping: shippingData,
         billing: sameAsShipping ? undefined : billingData,
         notes: notes || undefined,
-      }));
-
-      // Create Stripe payment session and redirect
-      const paymentUrl = await createStripePaymentSession();
+      });
       
       toast({
-        title: "Redirecting to Payment",
-        description: "Opening Stripe checkout in a new tab...",
+        title: "Order Completed",
+        description: "Your order has been successfully submitted!",
       });
 
-      // Open Stripe checkout in new tab
-      window.open(paymentUrl, '_blank');
+      // Close the dialog and reset form
+      onClose();
       
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error('Order completion error:', error);
       toast({
-        title: "Checkout Failed",
-        description: "There was an error starting checkout. Please try again.",
+        title: "Order Failed",
+        description: "There was an error completing your order. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -480,7 +458,7 @@ export const CheckoutForm = ({ isOpen, onClose, items, onCompleteOrder }: Checko
                   size="lg"
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
-                  {isSubmitting ? 'Opening Stripe Checkout...' : 'Pay with Stripe'}
+                  {isSubmitting ? 'Completing Order...' : 'Complete Order'}
                 </Button>
               </CardContent>
             </Card>
