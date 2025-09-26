@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Sparkles, ShoppingBag } from 'lucide-react';
+import { Zap, Sparkles, ShoppingBag, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface StoreHeaderProps {
   cartItemCount: number;
@@ -41,6 +42,15 @@ export const StoreHeader = ({ cartItemCount, onCartClick }: StoreHeaderProps) =>
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link to="/admin">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-foreground hover:text-primary"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          </Link>
           <Button 
             variant="outline" 
             onClick={onCartClick}

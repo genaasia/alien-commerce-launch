@@ -305,6 +305,80 @@ class GenabaseClient {
     return response.returned_data?.[0];
   }
 
+  // Admin: Get all products (including drafts)
+  async getAllProducts(): Promise<Product[]> {
+    const response = await this.executeRequest({
+      operation: 'select',
+      table: 'products',
+      data: [],
+      order_by: [{ column: 'created_at', direction: 'DESC' as const }],
+    });
+
+    return response.returned_data || [];
+  }
+
+  // Admin: Create product
+  async createProduct(productData: Partial<Product>): Promise<Product> {
+    const response = await this.executeRequest({
+      operation: 'insert',
+      table: 'products',
+      data: [productData],
+      return_columns: ['id', 'name', 'description', 'image_url', 'is_published', 'availability_status', 'tags', 'created_at', 'updated_at'],
+    });
+
+    return response.returned_data?.[0];
+  }
+
+  // Admin: Update product
+  async updateProduct(productId: string, productData: Partial<Product>): Promise<Product> {
+    const response = await this.executeRequest({
+      operation: 'update',
+      table: 'products',
+      data: [productData],
+      where_conditions: [{ column: 'id', op: 'eq' as const, value: productId }],
+      return_columns: ['id', 'name', 'description', 'image_url', 'is_published', 'availability_status', 'tags', 'created_at', 'updated_at'],
+    });
+
+    return response.returned_data?.[0];
+  }
+
+  // Admin: Create product variant
+  async createProductVariant(variantData: Partial<ProductVariant>): Promise<ProductVariant> {
+    const response = await this.executeRequest({
+      operation: 'insert',
+      table: 'product_variants',
+      data: [variantData],
+      return_columns: ['id', 'product_id', 'title', 'description', 'image_url', 'sku', 'price', 'compare_at_price', 'taxable', 'created_at', 'updated_at'],
+    });
+
+    return response.returned_data?.[0];
+  }
+
+  // Admin: Update product variant
+  async updateProductVariant(variantId: string, variantData: Partial<ProductVariant>): Promise<ProductVariant> {
+    const response = await this.executeRequest({
+      operation: 'update',
+      table: 'product_variants',
+      data: [variantData],
+      where_conditions: [{ column: 'id', op: 'eq' as const, value: variantId }],
+      return_columns: ['id', 'product_id', 'title', 'description', 'image_url', 'sku', 'price', 'compare_at_price', 'taxable', 'created_at', 'updated_at'],
+    });
+
+    return response.returned_data?.[0];
+  }
+
+  // Admin: Get orders
+  async getOrders(): Promise<Order[]> {
+    const response = await this.executeRequest({
+      operation: 'select',
+      table: 'orders',
+      data: [],
+      order_by: [{ column: 'created_at', direction: 'DESC' as const }],
+    });
+
+    return response.returned_data || [];
+  }
+
   // Checkout Process
   async createCustomer(email: string, firstName?: string, lastName?: string, phone?: string): Promise<Customer> {
     const response = await this.executeRequest({
