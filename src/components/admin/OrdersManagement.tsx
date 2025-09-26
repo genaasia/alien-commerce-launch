@@ -66,10 +66,13 @@ export const OrdersManagement = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING': return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30';
-      case 'CONFIRMED': return 'bg-blue-500/20 text-blue-700 border-blue-500/30';
-      case 'SHIPPED': return 'bg-green-500/20 text-green-700 border-green-500/30';
-      case 'DELIVERED': return 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30';
+      case 'PROCESSING': return 'bg-blue-500/20 text-blue-700 border-blue-500/30';
+      case 'ON-HOLD': return 'bg-orange-500/20 text-orange-700 border-orange-500/30';
+      case 'COMPLETED': return 'bg-green-500/20 text-green-700 border-green-500/30';
       case 'CANCELLED': return 'bg-red-500/20 text-red-700 border-red-500/30';
+      case 'REFUNDED': return 'bg-purple-500/20 text-purple-700 border-purple-500/30';
+      case 'FAILED': return 'bg-red-600/20 text-red-800 border-red-600/30';
+      case 'ARCHIVED': return 'bg-gray-500/20 text-gray-700 border-gray-500/30';
       default: return 'bg-gray-500/20 text-gray-700 border-gray-500/30';
     }
   };
@@ -150,9 +153,9 @@ export const OrdersManagement = () => {
               <Calendar className="w-5 h-5 text-blue-600" />
               <span className="text-sm text-muted-foreground">Pending Orders</span>
             </div>
-            <p className="text-2xl font-bold mt-2">
-              {orders.filter(order => order.status === 'PENDING').length}
-            </p>
+             <p className="text-2xl font-bold mt-2">
+               {orders.filter(order => order.status === 'PENDING' || order.status === 'PROCESSING').length}
+             </p>
           </CardContent>
         </Card>
         <Card>
@@ -224,17 +227,26 @@ export const OrdersManagement = () => {
                         <SelectItem value="PENDING">
                           <Badge className={getStatusColor('PENDING')}>PENDING</Badge>
                         </SelectItem>
-                        <SelectItem value="CONFIRMED">
-                          <Badge className={getStatusColor('CONFIRMED')}>CONFIRMED</Badge>
+                        <SelectItem value="PROCESSING">
+                          <Badge className={getStatusColor('PROCESSING')}>PROCESSING</Badge>
                         </SelectItem>
-                        <SelectItem value="SHIPPED">
-                          <Badge className={getStatusColor('SHIPPED')}>SHIPPED</Badge>
+                        <SelectItem value="ON-HOLD">
+                          <Badge className={getStatusColor('ON-HOLD')}>ON-HOLD</Badge>
                         </SelectItem>
-                        <SelectItem value="DELIVERED">
-                          <Badge className={getStatusColor('DELIVERED')}>DELIVERED</Badge>
+                        <SelectItem value="COMPLETED">
+                          <Badge className={getStatusColor('COMPLETED')}>COMPLETED</Badge>
                         </SelectItem>
                         <SelectItem value="CANCELLED">
                           <Badge className={getStatusColor('CANCELLED')}>CANCELLED</Badge>
+                        </SelectItem>
+                        <SelectItem value="REFUNDED">
+                          <Badge className={getStatusColor('REFUNDED')}>REFUNDED</Badge>
+                        </SelectItem>
+                        <SelectItem value="FAILED">
+                          <Badge className={getStatusColor('FAILED')}>FAILED</Badge>
+                        </SelectItem>
+                        <SelectItem value="ARCHIVED">
+                          <Badge className={getStatusColor('ARCHIVED')}>ARCHIVED</Badge>
                         </SelectItem>
                       </SelectContent>
                     </Select>
