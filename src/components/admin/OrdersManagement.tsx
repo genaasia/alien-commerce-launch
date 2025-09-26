@@ -76,6 +76,7 @@ export const OrdersManagement = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
+      console.log('Updating order status:', orderId, 'to', newStatus);
       await api.updateOrderStatus(orderId, newStatus);
       toast({
         title: "Status Updated",
@@ -217,18 +218,24 @@ export const OrdersManagement = () => {
                       onValueChange={(newStatus) => updateOrderStatus(order.id, newStatus)}
                     >
                       <SelectTrigger className="w-32">
-                        <SelectValue>
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
-                        </SelectValue>
+                        <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PENDING">PENDING</SelectItem>
-                        <SelectItem value="CONFIRMED">CONFIRMED</SelectItem>
-                        <SelectItem value="SHIPPED">SHIPPED</SelectItem>
-                        <SelectItem value="DELIVERED">DELIVERED</SelectItem>
-                        <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+                      <SelectContent className="z-50 bg-background">
+                        <SelectItem value="PENDING">
+                          <Badge className={getStatusColor('PENDING')}>PENDING</Badge>
+                        </SelectItem>
+                        <SelectItem value="CONFIRMED">
+                          <Badge className={getStatusColor('CONFIRMED')}>CONFIRMED</Badge>
+                        </SelectItem>
+                        <SelectItem value="SHIPPED">
+                          <Badge className={getStatusColor('SHIPPED')}>SHIPPED</Badge>
+                        </SelectItem>
+                        <SelectItem value="DELIVERED">
+                          <Badge className={getStatusColor('DELIVERED')}>DELIVERED</Badge>
+                        </SelectItem>
+                        <SelectItem value="CANCELLED">
+                          <Badge className={getStatusColor('CANCELLED')}>CANCELLED</Badge>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
