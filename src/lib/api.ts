@@ -355,6 +355,37 @@ class GenabaseClient {
 
     return response.returned_data || [];
   }
+
+  // Page Tracking
+  async trackVisitor(path: string, userAgent?: string, referrer?: string): Promise<void> {
+    const trackingUrl = `${API_BASE_URL}/tenants/${TENANT_ID}/databases/tracking/execute`;
+    
+    try {
+      const response = await fetch(trackingUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          operation: 'insert',
+          table: 'visitors',
+          data: [{
+            path,
+            user_agent: userAgent || null,
+            referrer: referrer || null,
+            ip_address: null // Cannot get IP from client-side
+          }],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Tracking request failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Visitor tracking error:', error);
+      throw error;
+    }
+  }
 }
 
 export const api = new GenabaseClient();
