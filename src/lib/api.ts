@@ -379,6 +379,19 @@ class GenabaseClient {
     return response.returned_data || [];
   }
 
+  // Admin: Update order status
+  async updateOrderStatus(orderId: string, status: string): Promise<Order> {
+    const response = await this.executeRequest({
+      operation: 'update',
+      table: 'orders',
+      data: [{ status }],
+      where_conditions: [{ column: 'id', op: 'eq' as const, value: orderId }],
+      return_columns: ['id', 'customer_id', 'cart_id', 'status', 'currency', 'subtotal_price', 'total_discounts', 'total_tax', 'shipping_price', 'total_price', 'created_at', 'updated_at'],
+    });
+
+    return response.returned_data?.[0];
+  }
+
   // Checkout Process
   async createCustomer(email: string, firstName?: string, lastName?: string, phone?: string): Promise<Customer> {
     const response = await this.executeRequest({

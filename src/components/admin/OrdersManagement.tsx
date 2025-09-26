@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -70,6 +71,24 @@ export const OrdersManagement = () => {
       case 'DELIVERED': return 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30';
       case 'CANCELLED': return 'bg-red-500/20 text-red-700 border-red-500/30';
       default: return 'bg-gray-500/20 text-gray-700 border-gray-500/30';
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await api.updateOrderStatus(orderId, newStatus);
+      toast({
+        title: "Status Updated",
+        description: `Order status changed to ${newStatus}`,
+      });
+      loadOrders(); // Refresh the orders list
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast({
+        title: "Update Error",
+        description: "Failed to update order status. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -193,9 +212,25 @@ export const OrdersManagement = () => {
                     {order.customer_name || 'Unknown Customer'}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status}
-                    </Badge>
+                    <Select
+                      value={order.status}
+                      onValueChange={(newStatus) => updateOrderStatus(order.id, newStatus)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue>
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PENDING">PENDING</SelectItem>
+                        <SelectItem value="CONFIRMED">CONFIRMED</SelectItem>
+                        <SelectItem value="SHIPPED">SHIPPED</SelectItem>
+                        <SelectItem value="DELIVERED">DELIVERED</SelectItem>
+                        <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>{order.item_count || 0} items</TableCell>
                   <TableCell className="font-medium">
