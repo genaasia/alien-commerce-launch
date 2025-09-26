@@ -367,16 +367,73 @@ class GenabaseClient {
     return response.returned_data?.[0];
   }
 
-  // Admin: Get orders
+  // Admin: Get orders with customer and item details
   async getOrders(): Promise<Order[]> {
-    const response = await this.executeRequest({
+    // First get all orders
+    const ordersResponse = await this.executeRequest({
       operation: 'select',
       table: 'orders',
       data: [],
       order_by: [{ column: 'created_at', direction: 'DESC' as const }],
     });
 
-    return response.returned_data || [];
+    const orders = ordersResponse.returned_data || [];
+    
+    // Get customer details for each order
+    const ordersWithDetails = await Promise.all(
+      orders.map(async (order) => {
+        let customerName = 'Unknown Customer';
+        let itemCount = 0;
+
+        // Get customer details
+        try {
+          const customerResponse = await this.executeRequest({
+            operation: 'select',
+            table: 'customers',
+            data: [],
+            where_conditions: [{ column: 'id', op: 'eq' as const, value: order.customer_id }],
+            return_columns: ['first_name', 'last_name', 'email'],
+          });
+
+          const customer = customerResponse.returned_data?.[0];
+          if (customer) {
+            if (customer.first_name && customer.last_name) {
+              customerName = `${customer.first_name} ${customer.last_name}`;
+            } else if (customer.first_name) {
+              customerName = customer.first_name;
+            } else if (customer.email) {
+              customerName = customer.email;
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to fetch customer details:', error);
+        }
+
+        // Get line items count
+        try {
+          const lineItemsResponse = await this.executeRequest({
+            operation: 'select',
+            table: 'line_items',
+            data: [],
+            where_conditions: [{ column: 'order_id', op: 'eq' as const, value: order.id }],
+            return_columns: ['quantity'],
+          });
+
+          const lineItems = lineItemsResponse.returned_data || [];
+          itemCount = lineItems.reduce((total, item) => total + (item.quantity || 0), 0);
+        } catch (error) {
+          console.warn('Failed to fetch line items:', error);
+        }
+
+        return {
+          ...order,
+          customer_name: customerName,
+          item_count: itemCount,
+        };
+      })
+    );
+
+    return ordersWithDetails;
   }
 
   // Admin: Update order status
