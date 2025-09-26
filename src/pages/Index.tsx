@@ -10,6 +10,8 @@ import { CheckoutForm } from '@/components/CheckoutForm';
 import { api, Product, ProductVariant, CartItem } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Zap, ShoppingBag } from 'lucide-react';
+import { usePageTracking } from '@/hooks/usePageTracking';
+import { useEventTracking } from '@/hooks/useEventTracking';
 
 interface CartItemWithDetails extends CartItem {
   variant?: ProductVariant;
@@ -28,6 +30,10 @@ const Index = () => {
   const [cartId, setCartId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  // Initialize tracking
+  usePageTracking();
+  useEventTracking();
 
   // Check for payment success on component mount
   useEffect(() => {

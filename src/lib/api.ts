@@ -356,8 +356,8 @@ class GenabaseClient {
     return response.returned_data || [];
   }
 
-  // Page Tracking
-  async trackVisitor(path: string, userAgent?: string, referrer?: string): Promise<void> {
+  // Event Tracking
+  async trackEvent(eventType: string, eventData?: any, path?: string): Promise<void> {
     const trackingUrl = `${API_BASE_URL}/tenants/${TENANT_ID}/databases/tracking/execute`;
     
     // Generate or retrieve session ID from localStorage
@@ -367,6 +367,9 @@ class GenabaseClient {
       localStorage.setItem('visitor-session-id', sessionId);
     }
     
+    const currentPath = path || window.location.pathname;
+    const eventInfo = eventData ? JSON.stringify(eventData) : null;
+    
     try {
       const response = await fetch(trackingUrl, {
         method: 'POST',
@@ -375,23 +378,28 @@ class GenabaseClient {
         },
         body: JSON.stringify({
           operation: 'insert',
-          table: 'visitors',
+          table: 'page_views',
           data: [{
-            path,
-            user_agent: userAgent || null,
-            referrer: referrer ? `${referrer} | session:${sessionId}` : `session:${sessionId}`, // Store session ID in referrer field
-            ip_address: null // Keep as null since it expects INET format
+            path: `${currentPath} | ${eventType}`,
+            user_agent: eventInfo,
+            referrer: `session:${sessionId}`,
+            ip_address: null
           }],
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Tracking request failed: ${response.status} ${response.statusText}`);
+        throw new Error(`Event tracking request failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Visitor tracking error:', error);
-      throw error;
+      console.error('Event tracking error:', error);
+      // Don't throw error to avoid disrupting user experience
     }
+  }
+
+  // Page Tracking (wrapper for trackEvent)
+  async trackVisitor(path: string, userAgent?: string, referrer?: string): Promise<void> {
+    await this.trackEvent('page_view', { userAgent, referrer }, path);
   }
 }
 
