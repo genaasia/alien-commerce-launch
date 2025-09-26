@@ -1,7 +1,7 @@
 // Genabase API Client for Alien Clothing Store
 
 const API_BASE_URL = 'https://api.genabase.com';
-const TENANT_ID = 'google-oauth2|113590440864166206329';
+const TENANT_ID = 'google-oauth2|110960506452287422576';
 const DB_NAME = 'default';
 
 export interface Product {
